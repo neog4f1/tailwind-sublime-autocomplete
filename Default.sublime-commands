@@ -1,0 +1,10 @@
+[
+    {
+        "caption": "Preferences: Tailwind Autocomplete Settings – User",
+        "command": "open_file",
+        "args": {
+            "file": "${packages}/User/tailwind_autocomplete.sublime-settings",
+            "platform": "Windows"
+        }
+    }
+]
