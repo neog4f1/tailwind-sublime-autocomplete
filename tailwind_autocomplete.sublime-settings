@@ -1,4 +1,4 @@
 {
-    "scopes": ["source.tsx string.quoted"],
+    "scopes": ["source.tsx string.quoted", "text.html string.quoted"],
     "classNames": ["class", "className"]
 }
