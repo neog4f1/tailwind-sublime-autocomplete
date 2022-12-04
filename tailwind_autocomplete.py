@@ -8,13 +8,23 @@ class tailwindCompletions(sublime_plugin.EventListener):
 
         self.class_completions = [("%s \tTailwind Class" % s, s) for s in tailwind_classes]
 
+    def checkScope(self):
+        # Match only in scopes
+        scopes = settings.get('scopes')
+        match = next(filter(lambda scope: self.view.find_by_selector(scope), scopes), None)
+        # matchString = next(filter(lambda scope: self.view.match_selector(locations[0], scope), scopes), None)
+        return match
+
     def on_query_completions(self, view, prefix, locations):
         jsSources = ["source.js string.quoted", "source.ts string.quoted", "source.tsx string.quoted"]
 
         matchHTMLString = view.match_selector(locations[0], "text.html string.quoted")
         matchJSString = next(filter(lambda source: view.match_selector(locations[0], source), jsSources), None)
 
+        # classNames = settings.get('classNames')
+
         if matchHTMLString or matchJSString:
+        # if self.checkScope(self):
 
             # Cursor is inside a quoted attribute
             # Now check if we are inside the class attribute
@@ -33,6 +43,10 @@ class tailwindCompletions(sublime_plugin.EventListener):
 
             # split attributes
             parts  = line.split('=')
+
+            # for item in classNames:
+            		# if len(parts) > 1 and parts[-2].strip().endswith(item):
+            				# return self.class_completions
 
             # is the last typed attribute a class attribute?
             if matchHTMLString:
