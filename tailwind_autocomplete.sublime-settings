@@ -1,0 +1,4 @@
+{
+    "scopes": ["source.tsx string.quoted"],
+    "classNames": ["class", "className"]
+}
