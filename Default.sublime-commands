@@ -1,6 +1,6 @@
 [
     {
-        "caption": "Preferences: Tailwind Autocomplete Settings – User",
+        "caption": "Preferences: Tailwind Auto Complete Settings – User",
         "command": "open_file",
         "args": {
             "file": "${packages}/User/tailwind_autocomplete.sublime-settings",
