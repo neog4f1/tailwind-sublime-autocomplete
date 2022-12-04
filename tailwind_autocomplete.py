@@ -21,7 +21,7 @@ class tailwindCompletions(sublime_plugin.EventListener):
         # matchHTMLString = view.match_selector(locations[0], "text.html string.quoted")
         # matchJSString = next(filter(lambda source: view.match_selector(locations[0], source), jsSources), None)
 
-        # classNames = settings.get('classNames')
+        classNames = settings.get('classNames')
 
         # if matchHTMLString or matchJSString:
         if self.checkScope(self, locations):
