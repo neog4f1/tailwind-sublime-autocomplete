@@ -29,17 +29,16 @@ class tailwindCompletions(sublime_plugin.EventListener):
         # tailwindClasses = self.settings.get("tailwindClasses")
         # self.class_completions = [("%s \tTailwind Class" % s, s) for s in tailwindClasses]
 
-    def checkScope(self, view, locations):
-        # settings = sublime.load_settings("tailwind_autocomplete.sublime-settings")
+    def checkScope(self):
         scopes = Settings.scopes
-        # scopes = self.settings.get("scopes")
-
-        # matchHTMLString = view.match_selector(locations[0], "text.html string.quoted")
-        checkScope = next(filter(lambda source: view.match_selector(locations[0], source), scopes), None)
-        return checkScope
+        # scopes = self.settings.get('scopes')
+        match = next(filter(lambda scope: self.view.find_by_selector(scope), scopes), None)
+        # match = view.match_selector(locations[0], "text.html string.quoted")
+        # match = next(filter(lambda scope: view.match_selector(locations[0], scope), scopes), None)
+        return match
 
     def on_query_completions(self, view, prefix, locations):
-        if not self.checkScope(view, locations):
+        if not self.checkScope():
             return []
 
         classNames = Settings.classNames
