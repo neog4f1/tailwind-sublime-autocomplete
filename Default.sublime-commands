@@ -1,10 +1,15 @@
 [
     {
-        "caption": "Preferences: Tailwind Auto Complete Settings – User",
-        "command": "open_file",
-        "args": {
-            "file": "${packages}/User/tailwind_autocomplete.sublime-settings",
-            "platform": "Windows"
-        }
+        "caption": "Preferences: Tailwind Auto Complete Settings",
+        "command": "edit_settings",
+        "args": { "base_file": "${packages}/tailwind-sublime-autocomplete/tailwind_autocomplete.sublime-settings" }
     }
+//     {
+//         "caption": "Preferences: Tailwind Auto Complete Settings – User",
+//         "command": "open_file",
+//         "args": {
+//             "file": "${packages}/User/tailwind_autocomplete.sublime-settings",
+//             "platform": "Windows"
+//         }
+//     }
 ]
