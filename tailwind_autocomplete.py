@@ -13,6 +13,7 @@ class tailwindCompletions(sublime_plugin.EventListener):
         print(self.settings.get("tailwindClasses"))
 
     def on_query_completions(self, view, prefix, locations):
+        print(self.settings.get("tailwindClasses"))
         setting = sublime.load_settings("tailwind_autocomplete.sublime-settings")
         jsSources = setting.get("scopes")
         # jsSources = ["source.tsx string.quoted", "text.html string.quoted"]
