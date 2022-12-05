@@ -1,59 +1,92 @@
-import sublime_plugin
 import sublime
+import sublime_plugin
+# import json
+import re
 
-class tailwindCompletions(sublime_plugin.EventListener):
-    # def __init__(self):
-        # self.class_completions = [("%s \tTailwind Class" % s, s) for s in tailwindClasses]
-        
-    def on_init(self, views):
-        self.settings = sublime.load_settings("tailwind_autocomplete.sublime-settings")
-        tailwindClasses = self.settings.get("tailwindClasses")
-        self.class_completions = [("%s \tTailwind Class" % s, s) for s in tailwindClasses]
+class TailwindOrderCommand(sublime_plugin.TextCommand):
 
-    def on_query_completions(self, view, prefix, locations):
-        # settings = sublime.load_settings("tailwind_autocomplete.sublime-settings")
-        jsSources = self.settings.get("scopes")
-
-        # matchHTMLString = view.match_selector(locations[0], "text.html string.quoted")
-        checkScope = next(filter(lambda source: view.match_selector(locations[0], source), jsSources), None)
-        
-        if not checkScope:
-            return []
-
-        classNames = self.settings.get("classNames")
-        # max search size
-        LIMIT = self.settings.get("limitChars")
-
-        # Cursor is inside a quoted attribute
-        # Now check if we are inside the class attribute
-
-        # place search cursor one word back
-        cursor = locations[0] - len(prefix) - 1
-
-        # dont start with negative value
-        start  = max(0, cursor - LIMIT - len(prefix))
-
-        # get part of buffer
-        line   = view.substr(sublime.Region(start, cursor))
-
-        # split attributes
-        parts  = line.split('=')
-        
-        # classNames
-        # classNames = ["className", "ClassName", "class"]
-        
+    def getRegexClassNames(self):
+        classNames = self.settings.get('classNames')
+        regex = "(?:"
         for item in classNames:
-            if len(parts) > 1 and parts[-2].strip().endswith(item):
-                return self.class_completions
+            regex += '(?<=' + item + '=")|'
+        regex += '(?<=class="))(.*?)(?=")'
+        # '(?:(?<=class=")|(?<=className="))(.*?)(?=")'
+        return regex
+    
+    def checkScope1(self):
+        scopes = self.settings.get('scopes')
+        cursor = self.view.sel()[0].begin()
+        curr_scope = view.scope_name(cursor)
 
-        # is the last typed attribute a class attribute?
-        # if matchHTMLString:
-          # if len(parts) > 1 and parts[-2].strip().endswith("class"):
-            # return self.class_completions
-        # if matchJSString:
-        # if len(parts) > 1 and parts[-2].strip().endswith("className"):
-          # return self.class_completions
-        # if len(parts) > 1 and parts[-2].strip().endswith("class"):
-            # return self.class_completions
+        return (curr_scope in scopes)
+    
+    def checkScope(self):
+        scopes = self.settings.get('scopes')
+        # matchHTMLString = view.match_selector(locations[0], "text.html string.quoted")
+        match = next(filter(lambda scope: self.view.find_by_selector(scope), scopes), None)
+        return match
 
-        return []
+    def create_filters(self, list):
+        filter_by = {}
+        for item in list:
+            filter_by[item] = []
+        return filter_by
+
+    def run(self, edit):
+        if not hasattr(self, "settings"):
+            self.settings = sublime.load_settings("tailwind-order.sublime-settings")
+        if not self.checkScope():
+            return 0
+        regex = self.getRegexClassNames()
+        list = self.settings.get('filter_by')
+        file = self.settings.get('data')
+        
+        # file = sublime.load_resource(sublime.find_resources('data.json')[0])
+        # file = json.loads(file)
+        # dif = 0
+        classes = self.view.find_all(regex)
+        # classes = self.view.find_all('(?<=class=")(.*?)(?=")')
+        
+        for item in classes:
+            # item.a += dif
+            # item.b += dif
+            # region = item
+            temp_classes = self.view.substr(item).strip()
+            if not temp_classes:
+                continue
+            temp_classes = re.sub(' +', ' ', temp_classes)
+            temp_classes = temp_classes.split(' ')
+
+            if len(temp_classes) < 2:
+                continue
+            filters = self.create_filters(list)
+            
+            other_classes = temp_classes[:]
+            sorted_class = ""
+            
+            for temp_class in temp_classes:
+                for tw_class in file:
+                    if temp_class.startswith(tw_class['name']):
+                        if tw_class['kind'] in filters.keys() and temp_class not in filters[tw_class['kind']]:
+                            filters[tw_class['kind']].append(temp_class)
+                            if temp_class in other_classes:
+                                other_classes.remove(temp_class)
+                        break # because flex-wrap will have flex and flex-
+            for kind in list:
+            # for kind in filters.keys():
+                if not filters[kind]:
+                    continue
+                filters[kind] = sorted(filters[kind])
+                sorted_class += ' '.join(filters[kind]) + ' '
+                # if filters[kind]:
+                    # sorted_class += ' '
+            if other_classes:
+                # ' '.join will add empty string when join because classes now arr and sorted return arr
+                if sorted_class:
+                    sorted_class = ' '.join(sorted(other_classes)) + ' ' + sorted_class[:-1]
+                else:
+                    sorted_class = ' '.join(sorted(other_classes))
+                # sorted_class += ' '.join(sorted(other_classes))
+            self.view.replace(edit, item, sorted_class)
+            # dif += len(sorted_class) - len(str(self.view.substr(item)))
