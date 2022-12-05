@@ -5,6 +5,7 @@ tailwind_classes = ["sm:","md:","lg:","xl:","2xl:","responsive:","dark:","motion
 
 class tailwindCompletions(sublime_plugin.EventListener):
     def __init__(self):
+        
         self.class_completions = [("%s \tTailwind Class" % s, s) for s in tailwind_classes]
         
     def onLoad(self, view):
