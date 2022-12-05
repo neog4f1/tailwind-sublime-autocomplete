@@ -5,8 +5,12 @@ tailwind_classes = ["sm:","md:","lg:","xl:","2xl:","responsive:","dark:","motion
 
 class tailwindCompletions(sublime_plugin.EventListener):
     def __init__(self):
-
         self.class_completions = [("%s \tTailwind Class" % s, s) for s in tailwind_classes]
+        
+    def plugin_loaded(self):
+        self.settings = sublime.load_settings("tailwind_autocomplete.sublime-settings")
+        print("setting:")
+        print(self.settings.get("tailwindClasses"))
 
     def on_query_completions(self, view, prefix, locations):
         setting = sublime.load_settings("tailwind_autocomplete.sublime-settings")
