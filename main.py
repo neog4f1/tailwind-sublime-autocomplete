@@ -14,7 +14,7 @@ class Settings:
     def setup():
         Settings.classNames = Settings.settings.get('classNames', 0)
         Settings.scopes = Settings.settings.get('scopes', 0)
-        Settings.limitChars = Settings.settings.get('limitChars', 222)
+        Settings.searchSize = Settings.settings.get('searchSize', 222)
 
 def plugin_loaded():
     Settings.init()
@@ -22,7 +22,7 @@ def plugin_loaded():
 class tailwindCompletions(sublime_plugin.EventListener):
     def __init__(self):
         self.class_completions = [("%s \tTailwind Class" % s, s) for s in tailwind_classes]
-        
+
     # def on_init(self, views):
         # self.settings = sublime.load_settings("tailwind_autocomplete.sublime-settings")
         # tailwindClasses = self.settings.get("tailwindClasses")
@@ -30,7 +30,6 @@ class tailwindCompletions(sublime_plugin.EventListener):
 
     def checkScope(self, view, locations):
         scopes = Settings.scopes
-        # scopes = self.settings.get('scopes')
         match = next(filter(lambda scope: view.match_selector(locations[0], scope), scopes), None)
         return match
 
@@ -38,29 +37,36 @@ class tailwindCompletions(sublime_plugin.EventListener):
         if not self.checkScope(view, locations):
             return []
 
-        classNames = Settings.classNames
-        # classNames = self.settings.get("classNames")
-        # max search size
-        LIMIT = Settings.limitChars
-        # LIMIT = self.settings.get("limitChars")
-
         # Cursor is inside a quoted attribute
         # Now check if we are inside the class attribute
 
         # place search cursor one word back
         cursor = locations[0] - len(prefix) - 1
 
+        # max search size
+        LIMIT = Settings.searchSize
+        # LIMIT = self.settings.get("searchSize")
+
         # dont start with negative value
-        start = max(0, cursor - LIMIT - len(prefix))
+        start = max(0, cursor - LIMIT)
+        # start = max(0, cursor - LIMIT - len(prefix))
 
         # get part of buffer
         line = view.substr(sublime.Region(start, cursor))
 
         # split attributes
         parts = line.split('=')
+        if len(parts) < 2:
+            return []
+
+        classNames = Settings.classNames
+        # classNames = self.settings.get("classNames")
+        
+        # get second last str in parts
+        str = parts[-2].strip()
         
         for item in classNames:
-            if len(parts) > 1 and parts[-2].strip().endswith(item):
+            if str.endswith(item):
                 return self.class_completions
 
         return []
