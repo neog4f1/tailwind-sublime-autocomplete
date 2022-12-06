@@ -1,5 +1,5 @@
 {
     "scopes": ["source.tsx string.quoted", "text.html string.quoted"],
     "classNames": ["class", "className"],
-    "limitChars": 333
+    "searchSize": 333
 }
